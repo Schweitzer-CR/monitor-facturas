@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor de Facturas</title>
+    <!-- Cargamos los scripts necesarios desde la nube -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+
+
+
+<div class="flex justify-end mb-4">
+    <a href="{% url 'logout' %}" class="text-sm text-red-400 hover:underline">Cerrar Sesión</a>
+</div>
+<body class="bg-slate-900 text-white p-10">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-blue-400"> Monitor de Facturas CR</h1>
+        
+        
+        <div hx-get="/" 
+             hx-trigger="load, every 20s" 
+             hx-target="#lista-facturas">
+            
+            <div id="lista-facturas" class="space-y-4">
+                <p class="text-gray-500 italic">Conectando con Gmail...</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

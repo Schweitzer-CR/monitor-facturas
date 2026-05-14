@@ -1,0 +1,16 @@
+{% for factura in facturas %}
+<a href="{% url 'detalle' factura.pk %}" target="_blank" class="block group">
+    <div class="bg-slate-800 p-6 rounded-lg border-l-4 border-blue-500 hover:bg-slate-750 transition duration-200 shadow-xl">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-bold group-hover:text-blue-400">{{ factura.emisor }}</h2>
+                <p class="text-gray-400 text-sm">ID: {{ factura.cedula }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-2xl font-black text-green-400">₡{{ factura.total }}</p>
+                <p class="text-xs text-gray-500 uppercase">Ver más detalles →</p>
+            </div>
+        </div>
+    </div>
+</a>
+{% endfor %}
