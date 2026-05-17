@@ -13,3 +13,13 @@ class Factura(models.Model):
 
     def __str__(self):
         return f"{self.emisor} - {self.total}"
+
+class ConfiguracionSistema(models.Model):
+    meses_historial = models.PositiveIntegerField(default=1, help_text="Cuántos meses atrás buscar facturas")
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Configuración del Sistema"
+
+    def __str__(self):
+        return f"Historial: {self.meses_historial} meses"

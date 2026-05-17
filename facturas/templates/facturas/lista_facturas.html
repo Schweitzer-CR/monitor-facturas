@@ -1,16 +1,149 @@
-{% for factura in facturas %}
-<a href="{% url 'detalle' factura.pk %}" target="_blank" class="block group">
-    <div class="bg-slate-800 p-6 rounded-lg border-l-4 border-blue-500 hover:bg-slate-750 transition duration-200 shadow-xl">
-        <div class="flex justify-between items-center">
+<!-- Contenedor Principal de Ancho Completo -->
+<div class="w-full min-h-screen bg-slate-950 px-4 py-6">
+    <div class="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 flex flex-col h-full">
+        
+        <!-- Encabezado con Botón de Exportar (Padding ajustado) -->
+        <div class="flex flex-col md:flex-row justify-between items-center p-6 border-b border-slate-800 gap-4">
             <div>
-                <h2 class="text-xl font-bold group-hover:text-blue-400">{{ factura.emisor }}</h2>
-                <p class="text-gray-400 text-sm">ID: {{ factura.cedula }}</p>
+                <h1 class="text-3xl font-black text-white tracking-tight">Historial de Facturas</h1>
+                <p class="text-slate-400 text-base">Panel de administración y control de documentos fiscales</p>
             </div>
-            <div class="text-right">
-                <p class="text-2xl font-black text-green-400">₡{{ factura.total }}</p>
-                <p class="text-xs text-gray-500 uppercase">Ver más detalles →</p>
-            </div>
+            
+            <a href="{% url 'exportar_excel' %}" 
+               class="flex items-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-8 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg shadow-emerald-900/30">
+                <i class="fas fa-file-excel text-xl"></i>
+                <span class="text-lg">Exportar Reporte Excel</span>
+            </a>
+        </div>
+
+        <!-- Tabla de Ancho Completo -->
+        <div class="p-6 overflow-x-auto flex-grow">
+            <table id="tablaFacturas" class="w-full text-left border-separate border-spacing-y-2">
+                <thead>
+                    <tr class="text-slate-400 text-sm uppercase tracking-widest">
+                        <th class="px-6 py-4 font-bold border-b border-slate-800">Emisor</th>
+                        <th class="px-6 py-4 font-bold border-b border-slate-800">Cédula Jurídica</th>
+                        <th class="px-6 py-4 font-bold border-b border-slate-800 text-center">Moneda</th>
+                        <th class="px-6 py-4 font-bold border-b border-slate-800 text-right">Monto Total</th>
+                        <th class="px-6 py-4 font-bold border-b border-slate-800 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="text-lg">
+                    {% for factura in facturas %}
+                    <tr class="bg-slate-800/30 hover:bg-slate-800/80 transition-all group rounded-lg">
+                        <td class="px-6 py-5 rounded-l-lg border-y border-l border-transparent group-hover:border-slate-700">
+                            <div class="flex flex-col">
+                                <span class="text-white font-bold group-hover:text-blue-400 transition-colors">
+                                    {{ factura.emisor }}
+                                </span>
+                                <span class="text-xs text-slate-500 font-mono mt-1">ID: {{ factura.mensaje_id }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5 border-y border-transparent group-hover:border-slate-700">
+                            <span class="text-slate-400 font-mono">{{ factura.cedula }}</span>
+                        </td>
+                        <td class="px-6 py-5 text-center border-y border-transparent group-hover:border-slate-700">
+                            <span class="px-3 py-1 rounded-full bg-slate-700 text-slate-100 text-sm font-black border border-slate-600">
+                                {{ factura.moneda }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-5 text-right border-y border-transparent group-hover:border-slate-700">
+                            <span class="text-green-400 font-black text-xl">
+                                ₡{{ factura.total }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-5 text-center rounded-r-lg border-y border-r border-transparent group-hover:border-slate-700">
+                            <a href="{% url 'detalle' factura.pk %}" target="_blank" 
+                               class="inline-flex items-center justify-center w-12 h-12 text-blue-500 hover:text-white transition-all rounded-xl hover:bg-blue-600 shadow-lg hover:shadow-blue-900/40">
+                                <i class="fas fa-external-link-alt text-xl"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-</a>
-{% endfor %}
+</div>
+
+<!-- Estilos DataTables Optimizados para Ancho Completo -->
+<style>
+    /* Estética del Buscador */
+    .dataTables_wrapper .dataTables_filter {
+        float: left !important;
+        text-align: left !important;
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+    .dataTables_filter label {
+        color: #94a3b8 !important;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .dataTables_filter input {
+        width: 400px !important;
+        background-color: #0f172a !important;
+        border: 2px solid #334155 !important;
+        color: #f8fafc !important;
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        margin-left: 1rem !important;
+        transition: all 0.2s;
+    }
+    .dataTables_filter input:focus {
+        border-color: #3b82f6 !important;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Paginación */
+    .dataTables_info {
+        color: #64748b !important;
+        padding-top: 2rem !important;
+        font-weight: 500;
+    }
+    .dataTables_paginate {
+        padding-top: 1.5rem !important;
+    }
+    .paginate_button {
+        padding: 8px 16px !important;
+        margin: 0 4px !important;
+        border-radius: 8px !important;
+        border: 1px solid #334155 !important;
+        background: #1e293b !important;
+        color: #94a3b8 !important;
+        cursor: pointer;
+    }
+    .paginate_button.current {
+        background: #3b82f6 !important;
+        color: white !important;
+        border-color: #3b82f6 !important;
+        font-weight: bold;
+    }
+    .paginate_button:hover:not(.current) {
+        background: #334155 !important;
+        color: white !important;
+    }
+</style>
+
+<!-- Scripts -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#tablaFacturas').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json",
+                "search": "🔍 Buscar emisor o cédula:"
+            },
+            "pageLength": 15,
+            "dom": '<"top"f>rt<"bottom"ip><"clear">', // Posiciona el buscador arriba
+            "order": [[ 0, "desc" ]],
+            "columnDefs": [
+                { "orderable": false, "targets": 4 }
+            ]
+        });
+    });
+</script>

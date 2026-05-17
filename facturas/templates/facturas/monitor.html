@@ -1,31 +1,101 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <title>Monitor de Facturas</title>
-    <!-- Cargamos los scripts necesarios desde la nube -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Facturas | Infinytsolutions</title>
+    
+    <!-- Scripts principales -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
+<body class="bg-slate-950 text-white min-h-full font-sans antialiased">
 
-
-<div class="flex justify-end mb-4">
-    <a href="{% url 'logout' %}" class="text-sm text-red-400 hover:underline">Cerrar Sesión</a>
-</div>
-<body class="bg-slate-900 text-white p-10">
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8 text-blue-400"> Monitor de Facturas CR</h1>
-        
-        
-        <div hx-get="/" 
-             hx-trigger="load, every 20s" 
-             hx-target="#lista-facturas">
-            
-            <div id="lista-facturas" class="space-y-4">
-                <p class="text-gray-500 italic">Conectando con Gmail...</p>
+    <!-- Barra de Navegación Superior -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-lg">
+                <i class="fas fa-file-invoice text-white text-xl"></i>
             </div>
+            <h1 class="text-xl font-black bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent uppercase tracking-tighter">
+                Monitor de Facturas CR
+            </h1>
+        </div>
+        
+        <div class="flex items-center gap-6">
+            <span class="text-slate-400 text-sm font-medium border-r border-slate-700 pr-6 hidden md:block">
+                Sincronización activa
+            </span>
+
+            <!-- BOTÓN DE CONFIGURACIÓN (ENGRANAJE) -->
+            <button onclick="document.getElementById('modalConfig').classList.remove('hidden')" 
+                    class="text-slate-400 hover:text-blue-400 transition-colors text-xl">
+                <i class="fas fa-cog"></i>
+            </button>
+
+            <a href="{% url 'logout' %}" class="flex items-center gap-2 text-red-400 hover:text-red-300 font-bold transition-colors">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </a>
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal -->
+    <main class="w-full">
+        <div class="p-4 md:p-8">
+            
+            <!-- Zona HTMX de carga -->
+            <div hx-get="/" 
+                 hx-trigger="load, every 30s" 
+                 hx-target="#lista-facturas">
+                
+                <div id="lista-facturas" class="w-full">
+                    <div class="flex flex-col items-center justify-center py-20">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                        <p class="text-slate-500 animate-pulse text-lg italic">Sincronizando con tu servidor de correo...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL DE CONFIGURACIÓN -->
+    <div id="modalConfig" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Configuración</h2>
+                <button onclick="document.getElementById('modalConfig').classList.add('hidden')" class="text-slate-500 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form action="{% url 'guardar_config' %}" method="POST" class="space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2 font-medium">Historial a sincronizar:</label>
+                    <select name="meses" class="w-full bg-slate-800 border border-slate-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                        <option value="1">1 Mes (Últimas facturas)</option>
+                        <option value="3">3 Meses (Trimestre)</option>
+                        <option value="6">6 Meses (Semestre)</option>
+                        <option value="12">1 Año (Reporte Anual)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all shadow-lg shadow-blue-900/20">
+                    Guardar y Actualizar
+                </button>
+            </form>
         </div>
     </div>
+
+    <footer class="p-8 text-center text-slate-600 text-sm">
+        &copy; 2026 Infinytsolutions - Sistema de Monitoreo Fiscal
+    </footer>
+
 </body>
 </html>

@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.urls import path
 # REVISA QUE ESTÉN LAS TRES AQUÍ:
 from facturas.views import monitor_view, login_view, factura_detalle, logout_view
+from django.urls import path
+from facturas import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -10,4 +12,7 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('factura/<int:pk>/', factura_detalle, name='detalle'), # Esta es la ruta del detalle
+    path('exportar/excel/', views.exportar_facturas_excel, name='exportar_excel'),
+    path('configurar/', views.guardar_configuracion, name='guardar_config'),
+    
 ]
