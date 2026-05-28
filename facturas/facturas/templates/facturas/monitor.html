@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Facturas | Infinytsolutions</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-white min-h-full font-sans antialiased">
+
+    <!-- Barra de Navegación -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-lg"><i class="fas fa-file-invoice text-white text-xl"></i></div>
+            <h1 class="text-xl font-black bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent uppercase tracking-tighter">Monitor de Facturas CR</h1>
+        </div>
+        <div class="flex items-center gap-6">
+            <button onclick="document.getElementById('modalConfig').classList.remove('hidden')" class="text-slate-400 hover:text-blue-400 transition-colors text-xl"><i class="fas fa-cog"></i></button>
+            <a href="{% url 'logout' %}" class="flex items-center gap-2 text-red-400 hover:text-red-300 font-bold transition-colors"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </div>
+    </nav>
+<div class="mx-4 md:mx-8 mt-6 p-4 bg-slate-900 border border-slate-800 rounded-xl shadow-lg">
+    <form method="GET" action="/exportar-excel/" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+        <div class="flex flex-col gap-2">
+            <label for="fecha_inicio" class="text-slate-400 font-bold text-xs uppercase tracking-wider">Fecha Inicio:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" 
+                   class="bg-slate-800 border border-slate-700 text-white rounded-lg py-2 px-3 focus:ring-2 focus:ring-emerald-500 outline-none w-full transition-all" style="color-scheme: dark;" required>
+        </div>
+        
+        <div class="flex flex-col gap-2">
+            <label for="fecha_fin" class="text-slate-400 font-bold text-xs uppercase tracking-wider">Fecha Fin:</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" 
+                   class="bg-slate-800 border border-slate-700 text-white rounded-lg py-2 px-3 focus:ring-2 focus:ring-emerald-500 outline-none w-full transition-all" style="color-scheme: dark;" required>
+        </div>
+        
+        <div>
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg w-full flex items-center justify-center gap-2 shadow-md transition-all active:scale-95">
+                <i class="fas fa-file-excel text-lg"></i> Descargar Reporte
+            </button>
+        </div>
+    </form>
+</div>
+    <main class="w-full p-4 md:p-8">
+        <!-- Filtro de Clientes -->
+        <div class="mb-8 p-4 bg-slate-900 border border-slate-800 rounded-xl flex items-center gap-4 shadow-lg">
+            <label class="text-slate-400 font-bold text-sm uppercase">Filtrar por cliente:</label>
+            <select id="filtro-cliente" name="cliente_id" 
+                    hx-get="{% url 'monitor' %}" 
+                    hx-trigger="change" 
+                    hx-target="#lista-facturas"
+                    class="bg-slate-800 border border-slate-700 text-white rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500 outline-none w-64">
+                <option value="todos">Todos los clientes</option>
+                {% for cuenta in cuentas %}
+                    <option value="{{ cuenta.id }}" {% if cliente_seleccionado|add:"0" == cuenta.id %}selected{% endif %}>{{ cuenta.nombre_cliente }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Tabla -->
+        <div id="lista-facturas" hx-get="{% url 'monitor' %}" hx-trigger="load, every 30s" hx-include="#filtro-cliente">
+            <div class="flex flex-col items-center justify-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                <p class="text-slate-500 animate-pulse text-lg italic">Sincronizando...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Configuración -->
+    <div id="modalConfig" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Configuración</h2>
+                <button onclick="document.getElementById('modalConfig').classList.add('hidden')" class="text-slate-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <form action="{% url 'guardar_config' %}" method="POST" class="space-y-4">
+                {% csrf_token %}
+                <label class="block text-slate-400 text-sm">Correo de reenvío:</label>
+                <input type="email" name="correo_destino" value="{{ config.correo_destino }}" class="w-full bg-slate-800 p-2 rounded border border-slate-700 text-white">
+                <button type="submit" class="w-full bg-blue-600 py-2 rounded font-bold">Guardar</button>
+            </form>
+
+            <hr class="my-6 border-slate-700">
+
+            <h3 class="text-xl font-bold mb-4">Cuentas de Clientes</h3>
+            <ul class="space-y-2 mb-6">
+                {% for cuenta in cuentas %}
+                <li class="bg-slate-800 p-3 rounded flex justify-between items-center border border-slate-700">
+                    <div>
+                        <span class="block font-bold text-blue-400">{{ cuenta.nombre_cliente }}</span>
+                        <span class="text-xs text-slate-400">{{ cuenta.correo_origen }}</span>
+                    </div>
+                    
+                    <!-- Formulario de borrado forzado -->
+                    <form action="{% url 'eliminar_cliente' cuenta.pk %}" method="POST" onsubmit="return confirm('¿Eliminar a {{ cuenta.nombre_cliente }}?');">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-red-900/50 hover:bg-red-600 text-red-500 hover:text-white p-2 rounded transition-all">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </form>
+                </li>
+                {% empty %}
+                <li class="text-slate-500 text-sm italic p-2 text-center">No hay clientes registrados.</li>
+                {% endfor %}
+            </ul>
+
+            <form action="{% url 'guardar_cliente' %}" method="POST" class="bg-slate-800 p-4 rounded space-y-2 border border-slate-700">
+                {% csrf_token %}
+                <input type="text" name="nombre_cliente" placeholder="Nombre cliente" class="w-full bg-slate-900 p-2 rounded text-sm" required>
+                <input type="email" name="correo_origen" placeholder="Correo" class="w-full bg-slate-900 p-2 rounded text-sm" required>
+                <input type="password" name="password_aplicacion" placeholder="Contraseña de aplicación" class="w-full bg-slate-900 p-2 rounded text-sm" required>
+                <button type="submit" class="w-full bg-green-600 py-2 rounded font-bold text-sm">+ Agregar</button>
+            </form>
+        </div>
+    </div>
+
+   
+</body>
+</html>
