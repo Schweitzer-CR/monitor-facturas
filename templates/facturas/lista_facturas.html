@@ -1,0 +1,174 @@
+<div class="w-full min-h-screen bg-slate-950 px-4 py-6">
+    <div class="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 flex flex-col h-full">
+        
+        <div class="flex flex-col md:flex-row justify-between items-center p-6 border-b border-slate-800 gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl font-black text-white tracking-tight">Historial de Facturas</h1>
+                <p class="text-slate-400 text-base mt-1">Panel de administración y control de documentos fiscales</p>
+            </div>
+            
+            <a href="{% url 'exportar_excel' %}" 
+               class="flex items-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 md:px-8 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg shadow-emerald-900/20 w-full md:w-auto justify-center">
+                <i class="fas fa-file-excel text-xl"></i>
+                <span class="text-lg">Exportar Reporte Excel</span>
+            </a>
+        </div>
+
+        <div class="p-6 overflow-x-auto flex-grow">
+            <table id="tablaFacturas" class="w-full text-left border-separate border-spacing-y-3">
+                <thead>
+                    <tr class="text-slate-400 text-sm uppercase tracking-widest bg-slate-900/50">
+                        <th class="px-6 py-4 font-bold border-b border-slate-800 rounded-tl-lg">Emisor</th>
+                        <th class="px-6 py-4 font-bold border-b border-slate-800">Cédula Jurídica</th>
+                        <th class="px-6 py-4 font-bold border-b border-slate-800 text-center">Moneda</th>
+                        <th class="px-6 py-4 font-bold border-b border-slate-800 text-right">Monto Total</th>
+                        <th class="px-6 py-4 font-bold border-b border-slate-800 text-center rounded-tr-lg">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="text-lg">
+                    {% for factura in facturas %}
+                    <tr class="bg-slate-800/40 hover:bg-slate-800 transition-all group rounded-xl shadow-sm hover:shadow-md">
+                        <td class="px-6 py-4 rounded-l-xl border-y border-l border-transparent group-hover:border-slate-700 w-2/5">
+                            <div class="flex items-center gap-4">
+                                <div class="hidden sm:flex flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 items-center justify-center border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                                    <i class="fas fa-building text-lg"></i>
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <span class="text-white font-bold group-hover:text-blue-400 transition-colors line-clamp-2 max-w-xs md:max-w-md lg:max-w-lg leading-tight">
+                                        {{ factura.emisor }}
+                                    </span>
+                                    <span class="text-xs text-slate-500 font-mono mt-1.5 flex items-center gap-1">
+                                        <i class="fas fa-hashtag text-[10px]"></i> {{ factura.mensaje_id|truncatechars:20 }}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <td class="px-6 py-4 border-y border-transparent group-hover:border-slate-700 whitespace-nowrap">
+                            <span class="text-slate-300 font-mono bg-slate-900/50 px-3 py-1.5 rounded-md border border-slate-700/50">
+                                {{ factura.cedula }}
+                            </span>
+                        </td>
+                        
+                        <td class="px-6 py-4 text-center border-y border-transparent group-hover:border-slate-700">
+                            <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-slate-900 text-slate-300 text-sm font-bold border border-slate-700 shadow-inner min-w-[3rem]">
+                                {{ factura.moneda }}
+                            </span>
+                        </td>
+                        
+                        <td class="px-6 py-4 text-right border-y border-transparent group-hover:border-slate-700 whitespace-nowrap">
+                            <div class="flex items-baseline justify-end gap-1">
+                                <span class="text-emerald-500/70 font-bold text-sm">₡</span>
+                                <span class="text-emerald-400 font-black text-xl tracking-tight">
+                                    {{ factura.total }}
+                                </span>
+                            </div>
+                        </td>
+                        
+                        <td class="px-6 py-4 text-center rounded-r-xl border-y border-r border-transparent group-hover:border-slate-700">
+                            <a href="{% url 'detalle' factura.pk %}" target="_blank" 
+                               class="inline-flex items-center justify-center w-11 h-11 text-blue-400 bg-blue-500/10 hover:text-white transition-all rounded-xl hover:bg-blue-600 border border-blue-500/20 hover:border-transparent hover:-translate-y-0.5">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estética del Buscador */
+    .dataTables_wrapper .dataTables_filter {
+        float: none !important;
+        text-align: left !important;
+        width: 100%;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+    }
+    .dataTables_filter label {
+        color: #94a3b8 !important;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+    .dataTables_filter input {
+        width: 100% !important;
+        max-width: 400px; /* Evita que rompa en móviles */
+        background-color: #0f172a !important;
+        border: 1px solid #334155 !important;
+        color: #f8fafc !important;
+        border-radius: 10px !important;
+        padding: 10px 16px !important;
+        margin-left: 1rem !important;
+        transition: all 0.2s ease;
+    }
+    .dataTables_filter input:focus {
+        border-color: #3b82f6 !important;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Ocultar elementos si están vacíos */
+    .dataTables_empty {
+        color: #64748b !important;
+        padding: 3rem !important;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    /* Paginación */
+    .dataTables_info {
+        color: #64748b !important;
+        padding-top: 1.5rem !important;
+        font-size: 0.9rem;
+    }
+    .dataTables_paginate {
+        padding-top: 1.5rem !important;
+        display: flex;
+        gap: 0.25rem;
+    }
+    .paginate_button {
+        padding: 0.5rem 1rem !important;
+        margin: 0 !important;
+        border-radius: 8px !important;
+        border: 1px solid #334155 !important;
+        background: transparent !important;
+        color: #94a3b8 !important;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+    }
+    .paginate_button.current {
+        background: #3b82f6 !important;
+        color: white !important;
+        border-color: #3b82f6 !important;
+        font-weight: 600;
+    }
+    .paginate_button:hover:not(.current):not(.disabled) {
+        background: #1e293b !important;
+        color: white !important;
+        border-color: #475569 !important;
+    }
+    .paginate_button.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#tablaFacturas').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json",
+                "search": "🔍 Buscar:",
+                "emptyTable": "No hay facturas registradas en el sistema",
