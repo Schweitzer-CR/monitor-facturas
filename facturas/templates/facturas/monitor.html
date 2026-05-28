@@ -32,7 +32,27 @@
             <a href="{% url 'logout' %}" class="flex items-center gap-2 text-red-400 hover:text-red-300 font-bold transition-colors"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>
     </nav>
-
+<div class="mx-4 md:mx-8 mt-6 p-4 bg-slate-900 border border-slate-800 rounded-xl shadow-lg">
+    <form method="GET" action="/exportar-excel/" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+        <div class="flex flex-col gap-2">
+            <label for="fecha_inicio" class="text-slate-400 font-bold text-xs uppercase tracking-wider">Fecha Inicio:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" 
+                   class="bg-slate-800 border border-slate-700 text-white rounded-lg py-2 px-3 focus:ring-2 focus:ring-emerald-500 outline-none w-full transition-all" style="color-scheme: dark;" required>
+        </div>
+        
+        <div class="flex flex-col gap-2">
+            <label for="fecha_fin" class="text-slate-400 font-bold text-xs uppercase tracking-wider">Fecha Fin:</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" 
+                   class="bg-slate-800 border border-slate-700 text-white rounded-lg py-2 px-3 focus:ring-2 focus:ring-emerald-500 outline-none w-full transition-all" style="color-scheme: dark;" required>
+        </div>
+        
+        <div>
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg w-full flex items-center justify-center gap-2 shadow-md transition-all active:scale-95">
+                <i class="fas fa-file-excel text-lg"></i> Descargar Reporte
+            </button>
+        </div>
+    </form>
+</div>
     <main class="w-full p-4 md:p-8">
         <!-- Filtro de Clientes -->
         <div class="mb-8 p-4 bg-slate-900 border border-slate-800 rounded-xl flex items-center gap-4 shadow-lg">
