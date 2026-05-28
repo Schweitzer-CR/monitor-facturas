@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from .models import Factura, ConfiguracionSistema, CuentaCorreoCliente
 from .utils import procesar_correos_usuario
+from django.utils.dateparse import parse_date
 
 HORA_INICIO = timezone.now()
 
@@ -93,6 +94,14 @@ def factura_detalle(request, pk):
 
 @login_required(login_url='login')
 def exportar_facturas_excel(request):
+    # 1. Capturar las fechas del formulario (vienen por método GET)
+    fecha_inicio_str = request.GET.get('fecha_inicio')
+    fecha_fin_str = request.GET.get('fecha_fin')
+    
+    # Convertir los strings de la interfaz a objetos de tipo fecha de Python
+    fecha_inicio = parse_date(fecha_inicio_str) if fecha_inicio_str else None
+    fecha_fin = parse_date(fecha_fin_str) if fecha_fin_str else None
+
     # Crear un nuevo libro de Excel
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -102,23 +111,43 @@ def exportar_facturas_excel(request):
     headers = ['Fecha Recibido', 'Emisor', 'Cédula', 'Moneda', 'Total']
     ws.append(headers)
 
-    # Filtrar solo las facturas del usuario que solicita la descarga
-    facturas = Factura.objects.filter(usuario_web=request.user).order_by('-fecha_recibido')
+    # 2. Filtrar base: solo las facturas del usuario web actual
+    facturas = Factura.objects.filter(usuario_web=request.user)
 
+    # 3. Aplicar los filtros de rango de fechas si el usuario los seleccionó
+    if fecha_inicio:
+        facturas = facturas.filter(fecha_recibido__date__gte=fecha_inicio)
+    if fecha_fin:
+        facturas = facturas.filter(fecha_recibido__date__lte=fecha_fin)
+
+    # Ordenar los resultados finales por fecha de recibido más reciente
+    facturas = facturas.order_by('-fecha_recibido')
+
+    # Agregar los datos al archivo de Excel
     for factura in facturas:
+        # Asegurar que si la fecha es nula por alguna razón, no rompa el bucle
+        fecha_limpia = factura.fecha_recibido.replace(tzinfo=None) if factura.fecha_recibido else ''
+        
         ws.append([
-            factura.fecha_recibido.replace(tzinfo=None), 
+            fecha_limpia, 
             factura.emisor,
             factura.cedula,
             factura.moneda,
             factura.total
         ])
 
-    # Configurar la respuesta
+    # Configurar la respuesta de descarga dinámica
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
-    response['Content-Disposition'] = 'attachment; filename="reporte_facturas_infinytsolutions.xlsx"'
+    
+    # Nombre del archivo dinámico indicando el periodo descargado
+    if fecha_inicio_str and fecha_fin_str:
+        filename = f'reporte_facturas_{fecha_inicio_str}_al_{fecha_fin_str}.xlsx'
+    else:
+        filename = 'reporte_facturas_completo.xlsx'
+        
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     
     wb.save(response)
     return response
